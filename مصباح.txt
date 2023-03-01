@@ -1,0 +1,54 @@
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.provider.Settings;
+import android.view.WindowManager.LayoutParams;
+import android.widget.SeekBar;
+ 
+public class MainActivity extends Activity {
+ 
+    private SeekBar seekBar;
+    private ContentResolver cResolver;
+    private LayoutParams layoutParams;
+ 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+ 
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+ 
+        cResolver = getContentResolver();
+ 
+        layoutParams = getWindow().getAttributes();
+ 
+        int currentBrightness = Settings.System.getInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, -1);
+ 
+        if (currentBrightness < 0) {
+            currentBrightness = 0;
+        }
+ 
+        seekBar.setProgress(currentBrightness);
+ 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+ 
+            int progress = 0;
+ 
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Settings.System.putInt(cResolver, Settings.System.SCREEN_BRIGHTNESS, progress);
+                layoutParams.screenBrightness = progress / (float) 255;
+                getWindow().setAttributes(layoutParams);
+            }
+ 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+ 
+            }
+ 
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
+                progress = progressValue;
+            }
+        });
+    }
+}
